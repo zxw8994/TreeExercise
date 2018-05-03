@@ -22,66 +22,87 @@ namespace TreeExercise
         Program prog = new Program();
         public Node insertNode(Node root, Node parent, int depth, int val, char pos)
         {
-            
-            // Set new node's parent and depth in tree
-            if(root == null)
+
+            // Set new node
+            if (root == null)
             {
                 root = new Node();
                 root.parent = parent;
+
                 root.depth = depth;
-            }
+                root.value = 0;
 
-            // Checks if node is the root node, set value to one
-            if (pos == 'n') root.value = val;
-
-            // Calls method to find parents neighbor's value based on if node is a left or right child
-            if(pos == 'l')
-            {
-                root.value = val + findNeighborValue(root.parent, 'l', root.depth);
             }
-            if(pos == 'r')
+            else
             {
-                root.value = val + findNeighborValue(root.parent, 'r', root.depth);
-            }
-
-            // If max depth has not been met, add a new right and left node
-            if (depth < prog.desiredDepth)
-            {
-                root.leftChild = insertNode(root.leftChild, root, depth + 1, root.value, 'l');
-                root.rightChild = insertNode(root.rightChild, root, depth + 1, root.value, 'r');
+                root.leftChild = insertNode(root.leftChild, root, depth, root.value, 'l');
+                root.rightChild = insertNode(root.rightChild, root, depth, root.value, 'r');
             }
             return root;
+        }
+
+        public Node insertRoot(Node root, int depth, int val)
+        {
+            root = new Node();
+            //root.parent = null;
+            root.depth = depth;
+            root.value = val;
+
+            return root;
+        }
+
+        public void addValue(Node node, char pos)
+        {
+            if (node.value == 0)
+            {
+                if (node.parent == null)
+                {
+                    node.value = 1;
+                }
+                else
+                {
+                    node.value = node.parent.value + findNeighborValue(node, pos, node.depth);
+                }
+            }
+            else
+            {
+                addValue(node.leftChild, 'l');
+                addValue(node.rightChild, 'r');
+            }
         }
 
         // Goes up the tree then down again to find value of parents neighbor
         int findNeighborValue(Node nodeParent, char pos, int depth)
         {
             bool stepOneDone = false;
-            //bool stepTwoDone = false;
-
-            
-            if(nodeParent.parent == null)
-            {
-                return 0;
-            }
+            bool stepTwoDone = false;
 
             Node currentNode = nodeParent;
 
-            
             // Loop that uses node's parent to go up the tree by 'hugging left/right wall'
             while (!stepOneDone)
             {
+                if (currentNode.parent == null)
+                {
+                    return 0;
+                }
                 if (pos == 'l')         // if original node was a leftChild, goes up tree checking until parents leftchild is not the current node
                 {
+
                     if (currentNode.parent.leftChild != currentNode)        // End loop if currentNode's parent's leftChild is currentNode
                     {
                         currentNode = currentNode.parent;
                         stepOneDone = true;
-                    }else if(currentNode.parent.leftChild == currentNode && currentNode.value == 1)     // Checks for node at the far left
+                    }
+                    else if (currentNode.parent.leftChild == currentNode && currentNode.value == 1)     // Checks for node at the far left
                     {
                         return 0;
                     }
-                    else currentNode = currentNode.parent;
+                    else if (currentNode.parent != null)
+                    {
+                        currentNode = currentNode.parent;
+                    }
+                    else return 0;
                 }
                 else if (pos == 'r')    // if original node was a rightChild, goes up tree checking until parents rightchild is not the current node
                 {
@@ -94,26 +115,50 @@ namespace TreeExercise
                     {
                         return 0;
                     }
-                    else currentNode = currentNode.parent;
+                    else if (currentNode.parent != null)
+                    {
+                        currentNode = currentNode.parent;
+                    }
+                    else return 0;
                 }
 
             }
 
             // Loops back down tree, going checking opposite child, until original nodes parents depth is met
-            while (currentNode.depth != depth - 1)
+            while (!stepTwoDone)
             {
                 if (pos == 'l')
                 {
                     currentNode = currentNode.rightChild;
+                    if (currentNode.depth == (depth - 1))
+                    {
+                        stepTwoDone = true;
+                    }
                 }
                 else if (pos == 'r')
                 {
                     currentNode = currentNode.leftChild;
+                    if (currentNode.depth == (depth - 1))
+                    {
+                        stepTwoDone = true;
+                    }
                 }
             }
-
             // Parents neighbor's node value
             return currentNode.value;
+        }
+
+
+        public void traverseTree(Node root)
+        {
+            if (root == null)
+            {
+                return;
+            }
+            Console.WriteLine("Depth: " + root.depth + "    Value: " + root.value);
+
+            traverseTree(root.leftChild);
+            traverseTree(root.rightChild);
         }
 
     }
@@ -121,20 +166,37 @@ namespace TreeExercise
 
     class Program
     {
-        public int desiredDepth;
-
-        void Main(string[] args)
+        static void Main(string[] args)
         {
-            desiredDepth = 3;
+
+
+            int desiredDepth;
+            //Convert.ToInt32(Console.ReadLine());
+            try
+            {
+                Console.Write("Enter how many levels the Tree should generate: ");
+                desiredDepth = int.Parse(Console.ReadLine());
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Enter a number.");
+                return;
+            }
 
             Node root = null;
-
-
             Tree tree = new Tree();
 
+            root = tree.insertRoot(root, 1, 1);
 
-            root = tree.insertNode(root, null, 1, 1, 'n');
+            for (int i = 2; i < desiredDepth + 1; i++)
+            {
+                // see if adding root as parent will set rootNode.parent as null
+                root = tree.insertNode(root, root, i, 1, 'n');//, desiredDepth);
+                // Method to add nodes value
+                tree.addValue(root, 'n');
+            }
 
+            tree.traverseTree(root);
         }
     }
 }
