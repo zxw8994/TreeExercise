@@ -19,7 +19,7 @@ namespace TreeExercise
     class Tree
     {
         // Set new node if null, otherwise insert a left and right child node
-        public Node insertNode(Node root, Node parent, int depth, char pos)
+        public Node InsertNode(Node root, Node parent, int depth, char pos)
         {
             if (root == null)
             {
@@ -31,15 +31,15 @@ namespace TreeExercise
             }
             else
             {
-                root.leftChild = insertNode(root.leftChild, root, depth, 'l');
-                root.rightChild = insertNode(root.rightChild, root, depth, 'r');
+                root.leftChild = InsertNode(root.leftChild, root, depth, 'l');
+                root.rightChild = InsertNode(root.rightChild, root, depth, 'r');
             }
             return root;
         }
 
 
         // Sets the root node and its value
-        public Node insertRoot(Node root, int val)
+        public Node InsertRoot(Node root, int val)
         {
             root = new Node();
 
@@ -51,7 +51,7 @@ namespace TreeExercise
 
 
         // Checks if node needs a value, if not call again for its children
-        public void addValue(Node node, char pos)
+        public void AddValue(Node node, char pos)
         {
             if (node.value == 0)
             {
@@ -61,18 +61,18 @@ namespace TreeExercise
                 }
                 else
                 {
-                    node.value = node.parent.value + findNeighborValue(node, pos, node.depth);
+                    node.value = node.parent.value + FindNeighborValue(node, pos, node.depth);
                 }
             }
             else
             {
-                addValue(node.leftChild, 'l');
-                addValue(node.rightChild, 'r');
+                AddValue(node.leftChild, 'l');
+                AddValue(node.rightChild, 'r');
             }
         }
 
         // Goes up the tree then down again to find value of parents neighbor
-        int findNeighborValue(Node node, char pos, int depth)
+        int FindNeighborValue(Node node, char pos, int depth)
         {
             bool stepOneDone = false;
             bool stepTwoDone = false;
@@ -165,7 +165,7 @@ namespace TreeExercise
 
 
         // Traverses tree from far left to right
-        public void traverseTree(Node root)
+        public void TraverseTree(Node root)
         {
             if (root == null)
             {
@@ -173,8 +173,8 @@ namespace TreeExercise
             }
             Console.WriteLine("Depth: " + root.depth + "    Value: " + root.value);
 
-            traverseTree(root.leftChild);
-            traverseTree(root.rightChild);
+            TraverseTree(root.leftChild);
+            TraverseTree(root.rightChild);
         }
 
     }
@@ -199,19 +199,21 @@ namespace TreeExercise
                 Console.WriteLine("Enter a number.");
                 return;
             }
-            
 
-            // Inserts root node
-            root = tree.insertRoot(root, 1);
 
-            for (int i = 2; i < desiredDepth + 1; i++)
-            {
-                root = tree.insertNode(root, root, i, 'n');
-                // Method to add in node's value
-                tree.addValue(root, 'n');
+            if (desiredDepth > 0)
+            { 
+                // Inserts root node
+                root = tree.InsertRoot(root, 1);
+
+                for (int i = 2; i < desiredDepth + 1; i++)
+                {
+                    root = tree.InsertNode(root, root, i, 'n');
+                    // Method to add in node's value
+                    tree.AddValue(root, 'n');
+                }
             }
-
-            tree.traverseTree(root);
+            tree.TraverseTree(root);
         }
     }
 }
